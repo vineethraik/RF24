@@ -163,13 +163,13 @@ extern HardwareSPI SPI;
     #else
         #define IF_SERIAL_DEBUG(x)
         #if defined(RF24_TINY)
-            #define printf_P(...)
+            #define RF24_printf_P(...)
         #endif // defined(RF24_TINY)
 
     #endif // SERIAL_DEBUG
 
     #if defined(__ARDUINO_X86__)
-        #define printf_P printf
+        #define RF24_printf_P printf
         #define _BV(bit) (1 << (bit))
 
     #endif // defined (__ARDUINO_X86__)
@@ -184,9 +184,9 @@ extern HardwareSPI SPI;
         // Serial.printf() is no longer defined in the unifying Arduino/ArduinoCore-API repo
         // Serial.printf() is defined if using the arduino-pico/esp32/8266 repo
         #if defined(ARDUINO_ARCH_ESP32) // do not `undef` when using the espressif SDK only
-            #undef printf_P             // needed for ESP32 core
+            #undef RF24_printf_P             // needed for ESP32 core
         #endif
-        #define printf_P Serial.printf
+        #define RF24_printf_P Serial.printf
     #elif defined(ARDUINO) && !defined(ESP_PLATFORM) && !defined(__arm__) && !defined(__ARDUINO_X86__) || defined(XMEGA)
         #include <avr/pgmspace.h>
         #define PRIPSTR "%S"
@@ -203,7 +203,7 @@ typedef char const char;
             // Serial.printf() is no longer defined in the unifying Arduino/ArduinoCore-API repo
             #if defined(ARDUINO_ARCH_SAMD) && defined(ARDUINO_SAMD_ADAFRUIT)
                 // it is defined if using the adafruit/ArduinoCore-samd repo
-                #define printf_P Serial.printf
+                #define RF24_printf_P Serial.printf
             #endif // defined (ARDUINO_ARCH_SAMD)
 
             #ifndef pgm_read_byte
@@ -217,8 +217,8 @@ typedef uint16_t prog_uint16_t;
         #ifndef PSTR
             #define PSTR(x) (x)
         #endif
-        #ifndef printf_P
-            #define printf_P printf
+        #ifndef RF24_printf_P
+            #define RF24_printf_P printf
         #endif
         #ifndef strlen_P
             #define strlen_P strlen

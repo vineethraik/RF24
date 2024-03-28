@@ -286,7 +286,7 @@ void RF24::write_register(uint8_t reg, uint8_t value, bool is_cmd_only)
 {
     if (is_cmd_only) {
         if (reg != RF24_NOP) { // don't print the get_status() operation
-            IF_SERIAL_DEBUG(printf_P(PSTR("write_register(%02x)\r\n"), reg));
+            IF_SERIAL_DEBUG(RF24_printf_P(PSTR("write_register(%02x)\r\n"), reg));
         }
         beginTransaction();
 #if defined(RF24_LINUX)
@@ -301,7 +301,7 @@ void RF24::write_register(uint8_t reg, uint8_t value, bool is_cmd_only)
         endTransaction();
     }
     else {
-        IF_SERIAL_DEBUG(printf_P(PSTR("write_register(%02x,%02x)\r\n"), reg, value));
+        IF_SERIAL_DEBUG(RF24_printf_P(PSTR("write_register(%02x,%02x)\r\n"), reg, value));
 #if defined(RF24_LINUX) || defined(RF24_RP2)
         beginTransaction();
         uint8_t* prx = spi_rxbuff;
@@ -511,7 +511,7 @@ uint8_t RF24::get_status(void)
 
 void RF24::print_status(uint8_t _status)
 {
-    printf_P(PSTR("STATUS\t\t= 0x%02x RX_DR=%x TX_DS=%x MAX_RT=%x RX_P_NO=%x TX_FULL=%x\r\n"), _status, (_status & _BV(RX_DR)) ? 1 : 0,
+    RF24_printf_P(PSTR("STATUS\t\t= 0x%02x RX_DR=%x TX_DS=%x MAX_RT=%x RX_P_NO=%x TX_FULL=%x\r\n"), _status, (_status & _BV(RX_DR)) ? 1 : 0,
              (_status & _BV(TX_DS)) ? 1 : 0, (_status & _BV(MAX_RT)) ? 1 : 0, ((_status >> RX_P_NO) & 0x07), (_status & _BV(TX_FULL)) ? 1 : 0);
 }
 
@@ -519,20 +519,20 @@ void RF24::print_status(uint8_t _status)
 
 void RF24::print_observe_tx(uint8_t value)
 {
-    printf_P(PSTR("OBSERVE_TX=%02x: PLOS_CNT=%x ARC_CNT=%x\r\n"), value, (value >> PLOS_CNT) & 0x0F, (value >> ARC_CNT) & 0x0F);
+    RF24_printf_P(PSTR("OBSERVE_TX=%02x: PLOS_CNT=%x ARC_CNT=%x\r\n"), value, (value >> PLOS_CNT) & 0x0F, (value >> ARC_CNT) & 0x0F);
 }
 
 /****************************************************************************/
 
 void RF24::print_byte_register(const char* name, uint8_t reg, uint8_t qty)
 {
-    printf_P(PSTR(PRIPSTR
+    RF24_printf_P(PSTR(PRIPSTR
                   "\t="),
              name);
     while (qty--) {
-        printf_P(PSTR(" 0x%02x"), read_register(reg++));
+        RF24_printf_P(PSTR(" 0x%02x"), read_register(reg++));
     }
-    printf_P(PSTR("\r\n"));
+    RF24_printf_P(PSTR("\r\n"));
 }
 
 /****************************************************************************/
@@ -540,21 +540,21 @@ void RF24::print_byte_register(const char* name, uint8_t reg, uint8_t qty)
 void RF24::print_address_register(const char* name, uint8_t reg, uint8_t qty)
 {
 
-    printf_P(PSTR(PRIPSTR
+    RF24_printf_P(PSTR(PRIPSTR
                   "\t="),
              name);
     while (qty--) {
         uint8_t* buffer = new uint8_t[addr_width];
         read_register(reg++ & REGISTER_MASK, buffer, addr_width);
 
-        printf_P(PSTR(" 0x"));
+        RF24_printf_P(PSTR(" 0x"));
         uint8_t* bufptr = buffer + addr_width;
         while (--bufptr >= buffer) {
-            printf_P(PSTR("%02x"), *bufptr); // NOLINT: clang-tidy seems to emit a false positive about zero-allocated memory here (*bufptr)
+            RF24_printf_P(PSTR("%02x"), *bufptr); // NOLINT: clang-tidy seems to emit a false positive about zero-allocated memory here (*bufptr)
         }
         delete[] buffer;
     }
-    printf_P(PSTR("\r\n"));
+    RF24_printf_P(PSTR("\r\n"));
 }
 
 /****************************************************************************/
@@ -712,7 +712,7 @@ void RF24::printDetails(void)
     printf("CSN Pin\t\t= /dev/spidev%d.%d\n", bus_numb, bus_ce);
     printf("CE Pin\t\t= Custom GPIO%d\n", ce_pin);
     #endif
-    printf_P(PSTR("SPI Speedz\t= %d Mhz\n"), static_cast<uint8_t>(spi_speed / 1000000)); //Print the SPI speed on non-Linux devices
+    RF24_printf_P(PSTR("SPI Speedz\t= %d Mhz\n"), static_cast<uint8_t>(spi_speed / 1000000)); //Print the SPI speed on non-Linux devices
     #if defined(RF24_LINUX)
     printf("================ NRF Configuration ================\n");
     #endif // defined(RF24_LINUX)
@@ -731,19 +731,19 @@ void RF24::printDetails(void)
     print_byte_register(PSTR("CONFIG\t"), NRF_CONFIG);
     print_byte_register(PSTR("DYNPD/FEATURE"), DYNPD, 2);
 
-    printf_P(PSTR("Data Rate\t" PRIPSTR
+    RF24_printf_P(PSTR("Data Rate\t" PRIPSTR
                   "\r\n"),
              (char*)(pgm_read_ptr(&rf24_datarate_e_str_P[getDataRate()])));
-    printf_P(PSTR("Model\t\t= " PRIPSTR
+    RF24_printf_P(PSTR("Model\t\t= " PRIPSTR
                   "\r\n"),
              (char*)(pgm_read_ptr(&rf24_model_e_str_P[isPVariant()])));
-    printf_P(PSTR("CRC Length\t" PRIPSTR
+    RF24_printf_P(PSTR("CRC Length\t" PRIPSTR
                   "\r\n"),
              (char*)(pgm_read_ptr(&rf24_crclength_e_str_P[getCRCLength()])));
-    printf_P(PSTR("PA Power\t" PRIPSTR
+    RF24_printf_P(PSTR("PA Power\t" PRIPSTR
                   "\r\n"),
              (char*)(pgm_read_ptr(&rf24_pa_dbm_e_str_P[getPALevel()])));
-    printf_P(PSTR("ARC\t\t= %d\r\n"), getARC());
+    RF24_printf_P(PSTR("ARC\t\t= %d\r\n"), getARC());
 }
 
 void RF24::printPrettyDetails(void)
@@ -756,64 +756,64 @@ void RF24::printPrettyDetails(void)
     printf("CSN Pin\t\t\t= /dev/spidev%d.%d\n", bus_numb, bus_ce);
     printf("CE Pin\t\t\t= Custom GPIO%d\n", ce_pin);
     #endif
-    printf_P(PSTR("SPI Frequency\t\t= %d Mhz\n"), static_cast<uint8_t>(spi_speed / 1000000)); //Print the SPI speed on non-Linux devices
+    RF24_printf_P(PSTR("SPI Frequency\t\t= %d Mhz\n"), static_cast<uint8_t>(spi_speed / 1000000)); //Print the SPI speed on non-Linux devices
     #if defined(RF24_LINUX)
     printf("================ NRF Configuration ================\n");
     #endif // defined(RF24_LINUX)
 
     uint8_t channel = getChannel();
     uint16_t frequency = static_cast<uint16_t>(channel + 2400);
-    printf_P(PSTR("Channel\t\t\t= %u (~ %u MHz)\r\n"), channel, frequency);
-    printf_P(PSTR("Model\t\t\t= " PRIPSTR
+    RF24_printf_P(PSTR("Channel\t\t\t= %u (~ %u MHz)\r\n"), channel, frequency);
+    RF24_printf_P(PSTR("Model\t\t\t= " PRIPSTR
                   "\r\n"),
              (char*)(pgm_read_ptr(&rf24_model_e_str_P[isPVariant()])));
 
-    printf_P(PSTR("RF Data Rate\t\t" PRIPSTR
+    RF24_printf_P(PSTR("RF Data Rate\t\t" PRIPSTR
                   "\r\n"),
              (char*)(pgm_read_ptr(&rf24_datarate_e_str_P[getDataRate()])));
-    printf_P(PSTR("RF Power Amplifier\t" PRIPSTR
+    RF24_printf_P(PSTR("RF Power Amplifier\t" PRIPSTR
                   "\r\n"),
              (char*)(pgm_read_ptr(&rf24_pa_dbm_e_str_P[getPALevel()])));
-    printf_P(PSTR("RF Low Noise Amplifier\t" PRIPSTR
+    RF24_printf_P(PSTR("RF Low Noise Amplifier\t" PRIPSTR
                   "\r\n"),
              (char*)(pgm_read_ptr(&rf24_feature_e_str_P[(read_register(RF_SETUP) & 1) * 1])));
-    printf_P(PSTR("CRC Length\t\t" PRIPSTR
+    RF24_printf_P(PSTR("CRC Length\t\t" PRIPSTR
                   "\r\n"),
              (char*)(pgm_read_ptr(&rf24_crclength_e_str_P[getCRCLength()])));
-    printf_P(PSTR("Address Length\t\t= %d bytes\r\n"), (read_register(SETUP_AW) & 3) + 2);
-    printf_P(PSTR("Static Payload Length\t= %d bytes\r\n"), getPayloadSize());
+    RF24_printf_P(PSTR("Address Length\t\t= %d bytes\r\n"), (read_register(SETUP_AW) & 3) + 2);
+    RF24_printf_P(PSTR("Static Payload Length\t= %d bytes\r\n"), getPayloadSize());
 
     uint8_t setupRetry = read_register(SETUP_RETR);
-    printf_P(PSTR("Auto Retry Delay\t= %d microseconds\r\n"), (setupRetry >> ARD) * 250 + 250);
-    printf_P(PSTR("Auto Retry Attempts\t= %d maximum\r\n"), setupRetry & 0x0F);
+    RF24_printf_P(PSTR("Auto Retry Delay\t= %d microseconds\r\n"), (setupRetry >> ARD) * 250 + 250);
+    RF24_printf_P(PSTR("Auto Retry Attempts\t= %d maximum\r\n"), setupRetry & 0x0F);
 
     uint8_t observeTx = read_register(OBSERVE_TX);
-    printf_P(PSTR("Packets lost on\n    current channel\t= %d\r\n"), observeTx >> 4);
-    printf_P(PSTR("Retry attempts made for\n    last transmission\t= %d\r\n"), observeTx & 0x0F);
+    RF24_printf_P(PSTR("Packets lost on\n    current channel\t= %d\r\n"), observeTx >> 4);
+    RF24_printf_P(PSTR("Retry attempts made for\n    last transmission\t= %d\r\n"), observeTx & 0x0F);
 
     uint8_t features = read_register(FEATURE);
-    printf_P(PSTR("Multicast\t\t" PRIPSTR
+    RF24_printf_P(PSTR("Multicast\t\t" PRIPSTR
                   "\r\n"),
              (char*)(pgm_read_ptr(&rf24_feature_e_str_P[static_cast<bool>(features & _BV(EN_DYN_ACK)) * 2])));
-    printf_P(PSTR("Custom ACK Payload\t" PRIPSTR
+    RF24_printf_P(PSTR("Custom ACK Payload\t" PRIPSTR
                   "\r\n"),
              (char*)(pgm_read_ptr(&rf24_feature_e_str_P[static_cast<bool>(features & _BV(EN_ACK_PAY)) * 1])));
 
     uint8_t dynPl = read_register(DYNPD);
-    printf_P(PSTR("Dynamic Payloads\t" PRIPSTR
+    RF24_printf_P(PSTR("Dynamic Payloads\t" PRIPSTR
                   "\r\n"),
              (char*)(pgm_read_ptr(&rf24_feature_e_str_P[(dynPl && (features & _BV(EN_DPL))) * 1])));
 
     uint8_t autoAck = read_register(EN_AA);
     if (autoAck == 0x3F || autoAck == 0) {
         // all pipes have the same configuration about auto-ack feature
-        printf_P(PSTR("Auto Acknowledgment\t" PRIPSTR
+        RF24_printf_P(PSTR("Auto Acknowledgment\t" PRIPSTR
                       "\r\n"),
                  (char*)(pgm_read_ptr(&rf24_feature_e_str_P[static_cast<bool>(autoAck) * 1])));
     }
     else {
         // representation per pipe
-        printf_P(PSTR("Auto Acknowledgment\t= 0b%c%c%c%c%c%c\r\n"),
+        RF24_printf_P(PSTR("Auto Acknowledgment\t= 0b%c%c%c%c%c%c\r\n"),
                  static_cast<char>(static_cast<bool>(autoAck & _BV(ENAA_P5)) + 48),
                  static_cast<char>(static_cast<bool>(autoAck & _BV(ENAA_P4)) + 48),
                  static_cast<char>(static_cast<bool>(autoAck & _BV(ENAA_P3)) + 48),
@@ -823,13 +823,13 @@ void RF24::printPrettyDetails(void)
     }
 
     config_reg = read_register(NRF_CONFIG);
-    printf_P(PSTR("Primary Mode\t\t= %cX\r\n"), config_reg & _BV(PRIM_RX) ? 'R' : 'T');
+    RF24_printf_P(PSTR("Primary Mode\t\t= %cX\r\n"), config_reg & _BV(PRIM_RX) ? 'R' : 'T');
     print_address_register(PSTR("TX address\t"), TX_ADDR);
 
     uint8_t openPipes = read_register(EN_RXADDR);
     for (uint8_t i = 0; i < 6; ++i) {
         bool isOpen = openPipes & _BV(i);
-        printf_P(PSTR("pipe %u (" PRIPSTR
+        RF24_printf_P(PSTR("pipe %u (" PRIPSTR
                       ") bound"),
                  i, (char*)(pgm_read_ptr(&rf24_feature_e_str_P[isOpen + 3])));
         if (i < 2) {
@@ -1235,7 +1235,7 @@ void RF24::powerUp(void)
 void RF24::errNotify()
 {
     #if defined(SERIAL_DEBUG) || defined(RF24_LINUX)
-    printf_P(PSTR("RF24 HARDWARE FAIL: Radio not responding, verify pin connections, wiring, etc.\r\n"));
+    RF24_printf_P(PSTR("RF24 HARDWARE FAIL: Radio not responding, verify pin connections, wiring, etc.\r\n"));
     #endif
     #if defined(FAILURE_HANDLING)
     failureDetected = 1;
@@ -1994,7 +1994,7 @@ void RF24::startConstCarrier(rf24_pa_dbm_e level, uint8_t channel)
     }
     setPALevel(level);
     setChannel(channel);
-    IF_SERIAL_DEBUG(printf_P(PSTR("RF_SETUP=%02x\r\n"), read_register(RF_SETUP)));
+    IF_SERIAL_DEBUG(RF24_printf_P(PSTR("RF_SETUP=%02x\r\n"), read_register(RF_SETUP)));
     ce(HIGH);
     if (isPVariant()) {
         delay(1); // datasheet says 1 ms is ok in this instance

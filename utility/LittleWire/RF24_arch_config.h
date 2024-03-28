@@ -25,7 +25,7 @@ typedef uint8_t rf24_gpio_pin_t;
 #define RF24_PIN_INVALID 0xFF
 
 #define PSTR(x)  (x)
-#define printf_P printf
+#define RF24_printf_P printf
 #define strlen_P strlen
 #define PROGMEM
 #define PRIPSTR "%s"
@@ -35,7 +35,7 @@ typedef uint8_t rf24_gpio_pin_t;
 #else
     #define IF_SERIAL_DEBUG(x)
     #if defined(RF24_TINY)
-        #define printf_P(...)
+        #define RF24_printf_P(...)
     #endif
 #endif
 

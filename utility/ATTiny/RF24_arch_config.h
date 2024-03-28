@@ -42,7 +42,7 @@ typedef uint8_t rf24_gpio_pin_t;
     #define IF_SERIAL_DEBUG(x)
 
     #if defined(RF24_TINY)
-        #define printf_P(...)
+        #define RF24_printf_P(...)
     #endif
 #endif // !defined(SERIAL_DEBUG)
 
